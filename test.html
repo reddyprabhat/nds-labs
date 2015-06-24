@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+ <link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.css" />
+ <script src="http://cdn.leafletjs.com/leaflet-0.7.3/leaflet.js"></script>
+<script src='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v0.0.4/Leaflet.fullscreen.min.js'></script>
+<link href='https://api.tiles.mapbox.com/mapbox.js/plugins/leaflet-fullscreen/v0.0.4/leaflet.fullscreen.css' rel='stylesheet' />
+<script src='Leaflet.MousePosition/src/L.Control.MousePosition.js'></script>
+<link href='Leaflet.MousePosition/src/L.Control.MousePosition.css' rel='stylesheet' />
+<script src='Leaflet.Coordinates/dist/Leaflet.Coordinates-0.1.4.src.js'></script>
+<link href='Leaflet.Coordinates/dist/Leaflet.Coordinates-0.1.4.css' rel='stylesheet' />
+</head>
+<body>
+
+
+ <div id="map" style="height:512px; width:512px"></div>
+ <script>
+
+var mapa1 = L.tileLayer('tiles2/{z}/{x}/{y}.png', {
+  maxZoom: 8,
+  continuousWorld : true,
+  noWrap : true,
+  attribution: 'MCK',
+});
+
+
+var mapa2 = L.tileLayer('tiles3/{z}/{x}/{y}.png', {
+  maxZoom: 4,	
+  continuousWorld : true,
+  noWrap : true,
+  opacity : 0.3,
+  attribution: 'MCK'
+});
+
+var mapa3 = L.tileLayer('tiles_map/{z}/{x}/{y}.png', {
+  maxZoom: 5,	
+  continuousWorld : true,
+  noWrap : true,
+  opacity : 0.4,
+  attribution: 'MCK'
+});
+
+
+
+
+    L.CRS.RADEC = L.extend({}, L.CRS, {
+        projection: L.Projection.LonLat,
+        transformation: new L.Transformation(1, 0, 1, 0),
+        scale: function (zoom) {
+            return Math.pow(2, zoom);
+        },
+        latLngToPoint: function(latlng, zoom) {
+            var adjlatlng = L.latLng((latlng.lat-this.adjust.y)/this.adjust.scale.y, (latlng.lng-this.adjust.x)/this.adjust.scale.x);
+            return L.CRS.Simple.latLngToPoint(adjlatlng, zoom);
+        },
+        pointToLatLng: function(point, zoom) {
+            var latlng = L.CRS.Simple.pointToLatLng(point, zoom);
+            latlng.lng = (latlng.lng*this.adjust.scale.x)+this.adjust.x;
+            latlng.lat = (latlng.lat*this.adjust.scale.y)+this.adjust.y;
+            return latlng;
+        },
+        adjust: {
+            x: 322.477471,
+            y: 0.713879+0.3736110,
+            scale: {
+                x:0.00278884,
+                y:0.0027886
+            }
+        }
+    });
+
+
+//L.CRS.RADEC = L.extend({}, L.CRS, {
+ //   projection: L.Projection.LonLat,
+ //   transformation: new L.Transformation(1,0,-1,0)});
+
+var map = new L.Map('map', {
+  center: [0.7305505, 322.8344425],
+  crs: L.CRS.RADEC,
+  zoomControl : true,
+  attributionControl : false,
+  minZoom: 0,
+  maxZoom: 8,	
+  zoom: 1,
+  layers: [mapa1]
+});
+ 
+
+var layers = L.control.layers({}, {
+  'Map1': mapa1,
+  'HMap': mapa2,
+  'RMap': mapa3,
+}).addTo(map);
+
+L.control.fullscreen().addTo(map);
+L.control.mousePosition({lngFirst: true, prefix : 'RA,DEC = '}).addTo(map);
+
+L.control.attribution({prefix:false}).addTo(map);
+
+</script>
+</body>
+</html>
